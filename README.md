@@ -1,6 +1,6 @@
 # program_quiz_app
 
-A new Flutter project.
+Test out your programming knowledge with this amazing app! 
 
 ## Getting Started
 
