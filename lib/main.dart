@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:program_quiz_app/quiz_center.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'reuseable_card.dart';
 import 'quiz_content.dart';
 import 'choice.dart';
@@ -13,14 +15,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Programming Quiz',
       theme: ThemeData.dark(),
       home: HomePage(),
     );
   }
 }
 
-enum Decision { A, B, C, D }
+QuizCenter quizCenter = QuizCenter();
 
 class HomePage extends StatefulWidget {
   @override
@@ -30,6 +32,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Decision decision;
   List<bool> scoreKeeper = [];
+  int score = 0;
 
   List<Widget> get scoreIcons =>
       scoreKeeper.map((e) => formatIntoIcon(e)).toList();
@@ -62,15 +65,20 @@ class _HomePageState extends State<HomePage> {
             color: kCardBackgroundColorLight,
             flexSize: 6,
             cardChild: QuizContent(
-              quizNumber: 1,
-              quizContent:
-                  'How do you print Hello World to the console in Python?',
+              quizNumber: quizCenter.getQuizNumber(),
+              quizContent: quizCenter.getQuizQuestion(),
             ),
           ),
 
           // score area
           Row(
-            children: scoreIcons,
+            children: scoreIcons.length == 0
+                ? [
+                    SizedBox(
+                      height: 30.0,
+                    )
+                  ]
+                : scoreIcons,
           ),
 
           // choices area
@@ -81,7 +89,7 @@ class _HomePageState extends State<HomePage> {
             flexSize: 1,
             cardChild: Choice(
               choice: 'A.',
-              answer: 'print(\'Hello World!\')',
+              answer: quizCenter.getQuizChoices()[0],
               checked: decision == Decision.A,
             ),
             cardFunction: () {
@@ -97,7 +105,7 @@ class _HomePageState extends State<HomePage> {
             flexSize: 1,
             cardChild: Choice(
               choice: 'B.',
-              answer: 'Print(Hello World!)',
+              answer: quizCenter.getQuizChoices()[1],
               checked: decision == Decision.B,
             ),
             cardFunction: () {
@@ -113,7 +121,7 @@ class _HomePageState extends State<HomePage> {
             flexSize: 1,
             cardChild: Choice(
               choice: 'C.',
-              answer: 'print Hello World!',
+              answer: quizCenter.getQuizChoices()[2],
               checked: decision == Decision.C,
             ),
             cardFunction: () {
@@ -129,7 +137,7 @@ class _HomePageState extends State<HomePage> {
             flexSize: 1,
             cardChild: Choice(
               choice: 'D.',
-              answer: 'print(\'Hello World!\")',
+              answer: quizCenter.getQuizChoices()[3],
               checked: decision == Decision.D,
             ),
             cardFunction: () {
@@ -139,13 +147,13 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           ReuseableCard(
-            color: Colors.green,
+            color: quizCenter.checkEndGame() ? Colors.red : Colors.green,
             flexSize: 1,
             cardChild: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Next Question',
+                  quizCenter.checkEndGame() ? 'Restart' : 'Next Question',
                   style: kGeneralTextStyle,
                 ),
                 Icon(
@@ -153,10 +161,60 @@ class _HomePageState extends State<HomePage> {
                 )
               ],
             ),
-            cardFunction: () {},
+            cardFunction: () => confirmBtnFunction(),
           ),
         ],
       ),
     );
+  }
+
+  bool checkForAnswer(Decision decision, Decision userInput) {
+    return decision == userInput;
+  }
+
+  void confirmBtnFunction() {
+    if (!quizCenter.checkEndGame()) {
+      Decision quizAnswer = quizCenter.getAnswer();
+      bool ans = checkForAnswer(decision, quizAnswer);
+      setState(() {
+        scoreKeeper.add(ans);
+        score += ans ? 10 : 0;
+        quizCenter.nextQuestion();
+        decision = null;
+        if (quizCenter.checkEndGame()) {
+          Alert(
+            context: context,
+            type: AlertType.success,
+            style: AlertStyle(
+              backgroundColor: Colors.white,
+            ),
+            title: "GAME OVER",
+            desc: "Your final score is: $score",
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "Restart",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+                onPressed: () {
+                  setState(() {
+                    quizCenter.resetGame();
+                    scoreKeeper = [];
+                    Navigator.pop(context);
+                  });
+                },
+                width: 120,
+              )
+            ],
+            closeFunction: () {},
+          ).show();
+        }
+      });
+    } else {
+      setState(() {
+        quizCenter.resetGame();
+        scoreKeeper = [];
+      });
+    }
   }
 }

@@ -1,6 +1,9 @@
 import 'quiz.dart';
+import 'constants.dart';
 
 class QuizCenter {
+  int quizNo = 0;
+  bool gameEnded = false;
   List<Quiz> quizList = [
     Quiz(
       quizNumber: 1,
@@ -11,7 +14,7 @@ class QuizCenter {
         'print Hello World!',
         'print(\'Hello World!\")',
       ],
-      answer: 'print(\'Hello World!\')',
+      answer: Decision.A,
     ),
     Quiz(
       quizNumber: 2,
@@ -23,12 +26,57 @@ class QuizCenter {
         'print something',
         'System.out.println(\'something\')',
       ],
-      answer: 'console.log(\'something\')',
-    )
+      answer: Decision.B,
+    ),
+    Quiz(
+        quizNumber: 3,
+        quizContent:
+            'What is the output of the below code? \n print(\'1\' + 1)',
+        choices: [
+          '2',
+          '\'2\'',
+          '11',
+          '\'11\'',
+        ],
+        answer: Decision.C),
   ];
 
-  // get next question
+  int getQuizNo() {
+    return quizNo;
+  }
 
-  // check answer
+  int getQuizNumber() {
+    return this.quizList[quizNo].quizNumber;
+  }
 
+  String getQuizQuestion() {
+    return this.quizList[quizNo].quizContent;
+  }
+
+  List<String> getQuizChoices() {
+    return this.quizList[quizNo].choices;
+  }
+
+  Decision getAnswer() {
+    return this.quizList[quizNo].answer;
+  }
+
+  void nextQuestion() {
+    if (quizNo < this.quizList.length) {
+      this.quizNo++;
+      if (quizNo == this.quizList.length) {
+        quizNo = this.quizList.length - 1;
+        this.gameEnded = true;
+      }
+    }
+  }
+
+  bool checkEndGame() {
+    return gameEnded;
+  }
+
+  void resetGame() {
+    quizNo = 0;
+    gameEnded = false;
+  }
 }
