@@ -50,6 +50,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    quizCenter.shuffleList();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -200,6 +206,7 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     quizCenter.resetGame();
                     scoreKeeper = [];
+                    score = 0;
                     Navigator.pop(context);
                   });
                 },
@@ -214,6 +221,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         quizCenter.resetGame();
         scoreKeeper = [];
+        score = 0;
       });
     }
   }
